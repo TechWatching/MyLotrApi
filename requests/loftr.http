@@ -1,0 +1,9 @@
+#--------------- Variables ---------------# 
+@url=https://localhost:5001
+
+#--------------- Requests ---------------# 
+### Retrieve popular lotr movies
+GET {{url}}/api/lotr/popularmovies
+
+### Retrive famous orcs
+GET {{url}}/api/lotr/famousorcs
