@@ -1,17 +1,14 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
-
+using MyLotrApi.Configurations;
 using Newtonsoft.Json;
-
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyLotrApi
+namespace MyLotrApi.Services
 {
     public class TheOneApiService : ITheOneApiService
     {
@@ -51,11 +48,6 @@ namespace MyLotrApi
             }
 
             var response = await _httpClient.SendAsync(request);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new TheOneApiException(response.StatusCode, response.ReasonPhrase);
-            }
 
             var responseContent = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<T>(responseContent);
