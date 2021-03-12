@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace MyLotrApi
+namespace MyLotrApi.Exceptions
 {
     [Serializable]
     internal class TheOneApiException : Exception
