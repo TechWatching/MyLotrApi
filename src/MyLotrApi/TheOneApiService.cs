@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 
 using Newtonsoft.Json;
 
@@ -6,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,38 +16,49 @@ namespace MyLotrApi
     public class TheOneApiService : ITheOneApiService
     {
         private readonly HttpClient _httpClient;
+        private readonly TheOneApiConfiguration _configuration;
 
-        public TheOneApiService(HttpClient httpClient)
+        public TheOneApiService(HttpClient httpClient, IOptions<TheOneApiConfiguration> configuration)
         {
             _httpClient = httpClient;
+            _configuration = configuration.Value;
         }
 
         public async Task<IList<Movie>> GetMovies(IDictionary<string, string?>? queryParams = null)
         {
-            var route = "movie";
-            var url = queryParams != null ? QueryHelpers.AddQueryString(route, queryParams) : route;
-            var response = await _httpClient.GetAsync(url);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new TheOneApiException(response.StatusCode, response.ReasonPhrase);
-            }
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var movieResponse = JsonConvert.DeserializeObject<MovieResponse>(responseContent);
+            var movieResponse = await Send<MovieResponse>(HttpMethod.Get, "movie", queryParams);
             return movieResponse.Docs;
         }
 
         public async Task<IList<Character>> GetCharacters(IDictionary<string, string?>? queryParams = null)
         {
-            var route = "character";
-            var url = queryParams != null? QueryHelpers.AddQueryString(route, queryParams) : route;
-            var response = await _httpClient.GetAsync(url);
+            var characterResponse = await Send<CharacterResponse>(HttpMethod.Get, "character", queryParams);
+            return characterResponse.Docs;
+        }
+
+        private async Task<T> Send<T>(
+            HttpMethod httpMethod,
+            string route, 
+            IDictionary<string, string?>? queryParams = null, 
+            object? requestContent = null)
+        {
+            var url = queryParams != null ? QueryHelpers.AddQueryString(route, queryParams) : route;
+
+            using var request = new HttpRequestMessage(httpMethod, $"{_configuration.BaseUrl}{url}");
+            if (requestContent is not null)
+            {
+                request.Content = new StringContent(JsonConvert.SerializeObject(requestContent), Encoding.UTF8, MediaTypeNames.Application.Json);
+            }
+
+            var response = await _httpClient.SendAsync(request);
+
             if (!response.IsSuccessStatusCode)
             {
                 throw new TheOneApiException(response.StatusCode, response.ReasonPhrase);
             }
+
             var responseContent = await response.Content.ReadAsStringAsync();
-            var characterResponse = JsonConvert.DeserializeObject<CharacterResponse>(responseContent);
-            return characterResponse.Docs;
+            return JsonConvert.DeserializeObject<T>(responseContent);
         }
     }
 }
