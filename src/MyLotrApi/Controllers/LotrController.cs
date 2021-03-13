@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MyLotrApi.Exceptions;
 using MyLotrApi.Services;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,32 +21,18 @@ namespace MyLotrApi.Controllers
         [Route("popularmovies")]
         public async Task<IActionResult> GetPopularMovies()
         {
-            try
-            {
-                var movies = await _theOneApiService.GetMovies();
-                var popularMovies = movies.Where(m => m.RottenTomatesScore > 80);
-                return Ok(popularMovies);
-            }
-            catch (TheOneApiException ex)
-            {
-                return StatusCode((int) ex.StatusCode, ex.ReasonPhrase);
-            }
+            var movies = await _theOneApiService.GetMovies();
+            var popularMovies = movies.Where(m => m.RottenTomatesScore > 80);
+            return Ok(popularMovies);
         }
 
         [HttpGet]
         [Route("famousorcs")]
         public async Task<IActionResult> GetFamousORcs()
         {
-            try
-            {
-                Dictionary<string, string?> queryParams = new() { ["race"] = "Orc" };
-                var movies = await _theOneApiService.GetCharacters(queryParams);
-                return Ok(movies);
-            }
-            catch (TheOneApiException ex)
-            {
-                return StatusCode((int)ex.StatusCode, ex.ReasonPhrase);
-            }
+            Dictionary<string, string?> queryParams = new() { ["race"] = "Orc" };
+            var movies = await _theOneApiService.GetCharacters(queryParams);
+            return Ok(movies);
         }
     }
 }

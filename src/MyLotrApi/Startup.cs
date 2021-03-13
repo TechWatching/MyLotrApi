@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using MyLotrApi.Configurations;
+using MyLotrApi.Middlewares;
 using MyLotrApi.Services;
 using MyLotrApi.Services.HttpMessageHandlers;
 using System;
@@ -50,6 +51,8 @@ namespace MyLotrApi
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyLotrApi v1"));
             }
+
+            app.UseMiddleware<ErrorHandlingMiddleware>();
 
             app.UseHttpsRedirection();
 
