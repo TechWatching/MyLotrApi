@@ -1,11 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using MyLotrApi.Models.QueryParams;
+using Refit;
 using System.Threading.Tasks;
 
 namespace MyLotrApi.Services
 {
     public interface ITheOneApiService
     {
-        Task<IList<Movie>> GetMovies(IDictionary<string, string?>? queryParams = null);
-        Task<IList<Character>> GetCharacters(IDictionary<string, string?>? queryParams = null);
+        [Get("/movie")]
+        Task<MovieResponse> GetMovies();
+        
+        [Get("/character")]
+        Task<CharacterResponse> GetCharacters(CharacterQueryParam? characterQueryParam = null);
     }
 }

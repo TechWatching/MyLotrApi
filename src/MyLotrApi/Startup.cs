@@ -9,6 +9,7 @@ using MyLotrApi.Configurations;
 using MyLotrApi.Middlewares;
 using MyLotrApi.Services;
 using MyLotrApi.Services.HttpMessageHandlers;
+using Refit;
 using System;
 using System.Net.Http.Headers;
 
@@ -33,13 +34,15 @@ namespace MyLotrApi
             });
             services.Configure<TheOneApiConfiguration>(Configuration.GetSection("TheOneApi"));
             services.AddTransient<TheOneApiErrorDelegatingHandler>();
-            services.AddHttpClient<ITheOneApiService, TheOneApiService>((serviceProvider, httpClient) =>
-                {
-                    var apiConfiguration = serviceProvider.GetRequiredService<IOptions<TheOneApiConfiguration>>().Value;
-                    httpClient.BaseAddress = new Uri(apiConfiguration.BaseUrl);
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiConfiguration.ApiKey);
-                })
-                .AddHttpMessageHandler<TheOneApiErrorDelegatingHandler>();
+
+            services.AddRefitClient<ITheOneApiService>()
+                    .ConfigureHttpClient((serviceProvider, httpClient) =>
+                    {
+                        var apiConfiguration = serviceProvider.GetRequiredService<IOptions<TheOneApiConfiguration>>().Value;
+                        httpClient.BaseAddress = new Uri(apiConfiguration.BaseUrl);
+                        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiConfiguration.ApiKey);
+                    })
+                    .AddHttpMessageHandler<TheOneApiErrorDelegatingHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
