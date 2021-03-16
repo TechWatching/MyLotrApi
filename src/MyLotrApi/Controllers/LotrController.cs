@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MyLotrApi.Models.QueryParams;
 using MyLotrApi.Services;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,18 +21,21 @@ namespace MyLotrApi.Controllers
         [Route("popularmovies")]
         public async Task<IActionResult> GetPopularMovies()
         {
-            var movies = await _theOneApiService.GetMovies();
-            var popularMovies = movies.Where(m => m.RottenTomatesScore > 80);
+            var movieResponse = await _theOneApiService.GetMovies();
+            var popularMovies = movieResponse.Docs.Where(m => m.RottenTomatesScore > 80);
             return Ok(popularMovies);
         }
 
         [HttpGet]
         [Route("famousorcs")]
-        public async Task<IActionResult> GetFamousORcs()
+        public async Task<IActionResult> GetFamousOrcs()
         {
-            Dictionary<string, string?> queryParams = new() { ["race"] = "Orc" };
-            var movies = await _theOneApiService.GetCharacters(queryParams);
-            return Ok(movies);
+            var queryParams = new CharacterQueryParam
+            {
+                Race = "Orc"
+            };
+            var characterResponse = await _theOneApiService.GetCharacters(queryParams);
+            return Ok(characterResponse.Docs);
         }
     }
 }
